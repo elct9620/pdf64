@@ -4,6 +4,8 @@ type ErrorCode int
 
 const (
 	ErrCodeMaxFileSize ErrorCode = iota + 1
+	ErrCodeBadRequest
+	ErrCodeInternal
 )
 
 type Error struct {

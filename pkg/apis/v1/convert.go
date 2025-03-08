@@ -7,6 +7,20 @@ import (
 	"strconv"
 )
 
+// Helper function to respond with error
+func respondWithError(w http.ResponseWriter, err Error, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(err)
+}
+
+// Helper function to respond with JSON
+func respondWithJSON(w http.ResponseWriter, data interface{}, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(data)
+}
+
 type ConvertRequest struct {
 	Density string `json:"density"`
 	Quality int    `json:"quality"`
@@ -20,31 +34,37 @@ type ConvertResponse struct {
 
 func PostConvert(impl ServiceImpl) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// 解析多部分表單，32 MB 是最大記憶體
+		// Parse multipart form, 32 MB is the max memory
 		err := r.ParseMultipartForm(32 << 20)
 		if err != nil {
-			http.Error(w, "無法解析表單", http.StatusBadRequest)
+			respondWithError(w, Error{
+				Code:    ErrCodeBadRequest,
+				Message: "Failed to parse form",
+			}, http.StatusBadRequest)
 			return
 		}
 
-		// 獲取可選的表單參數
+		// Get optional form parameters
 		density := r.FormValue("density")
 
-		// 解析可選的 quality 參數
+		// Parse optional quality parameter
 		quality := 0
 		qualityStr := r.FormValue("quality")
 		if qualityStr != "" {
 			quality, err = strconv.Atoi(qualityStr)
 			if err != nil {
-				http.Error(w, "quality 參數必須是整數", http.StatusBadRequest)
-				return
+				// Continue processing, let ServiceImpl handle validation
+				quality = 0
 			}
 		}
 
-		// 獲取上傳的檔案
+		// Get uploaded file
 		file, _, err := r.FormFile("data")
 		if err != nil {
-			http.Error(w, "無法獲取上傳的檔案", http.StatusBadRequest)
+			respondWithError(w, Error{
+				Code:    ErrCodeBadRequest,
+				Message: "Failed to get uploaded file",
+			}, http.StatusBadRequest)
 			return
 		}
 		defer file.Close()
@@ -56,21 +76,23 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 			File:    file,
 		}
 
-		// 呼叫實現的 Convert 方法
+		// Call the implementation's Convert method
 		resp, err := impl.Convert(r.Context(), &req)
 		if err != nil {
-			http.Error(w, "轉換失敗: "+err.Error(), http.StatusInternalServerError)
+			// Check if it's a custom error
+			if apiErr, ok := err.(Error); ok {
+				respondWithError(w, apiErr, http.StatusBadRequest)
+			} else {
+				// Unknown error
+				respondWithError(w, Error{
+					Code:    ErrCodeInternal,
+					Message: "Conversion failed: " + err.Error(),
+				}, http.StatusInternalServerError)
+			}
 			return
 		}
 
-		// 設置回應標頭
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		// 編碼並回傳回應
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			http.Error(w, "無法編碼回應", http.StatusInternalServerError)
-			return
-		}
+		// Set response headers and return response
+		respondWithJSON(w, resp, http.StatusOK)
 	}
 }
