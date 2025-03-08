@@ -54,6 +54,13 @@ func (s *Service) Convert(ctx context.Context, req *v1.ConvertRequest) (*v1.Conv
 		Quality:  quality,
 	})
 	if err != nil {
+		// Handle specific errors
+		if err == usecase.ErrPasswordRequired {
+			return nil, v1.Error{
+				Code:    v1.ErrCodePasswordRequired,
+				Message: "Password is required for encrypted PDF",
+			}
+		}
 		return nil, err
 	}
 

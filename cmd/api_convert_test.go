@@ -16,6 +16,7 @@ import (
 	"github.com/elct9620/pdf64/internal/entity"
 	"github.com/elct9620/pdf64/internal/usecase"
 	apiV1 "github.com/elct9620/pdf64/pkg/apis/v1"
+	"github.com/google/uuid"
 )
 
 // MockImageConvertService is a mock implementation of the ImageConvertService interface
@@ -34,7 +35,12 @@ type MockFileBuilder struct {
 
 // BuildFromPath returns a file that is encrypted based on isEncrypted flag
 func (m *MockFileBuilder) BuildFromPath(path string) (*entity.File, error) {
-	file := entity.NewFile("test-id", path)
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+	
+	file := entity.NewFile(id.String(), path)
 	if m.isEncrypted {
 		file.Encrypt()
 	}
