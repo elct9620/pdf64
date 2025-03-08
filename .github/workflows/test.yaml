@@ -57,17 +57,17 @@ jobs:
           sudo mkdir -p /etc/ImageMagick-7
           sudo cp /usr/local/etc/ImageMagick-7/policy.xml /etc/ImageMagick-7/ || true
           sudo bash -c 'cat > /etc/ImageMagick-7/policy.xml << EOF
-<policymap>
-  <policy domain="resource" name="memory" value="256MiB"/>
-  <policy domain="resource" name="map" value="512MiB"/>
-  <policy domain="resource" name="width" value="16KP"/>
-  <policy domain="resource" name="height" value="16KP"/>
-  <policy domain="resource" name="area" value="128MB"/>
-  <policy domain="resource" name="disk" value="1GiB"/>
-  <policy domain="delegate" rights="read|write" pattern="PDF" />
-  <policy domain="coder" rights="read|write" pattern="PDF" />
-</policymap>
-EOF'
+          <policymap>
+            <policy domain="resource" name="memory" value="256MiB"/>
+            <policy domain="resource" name="map" value="512MiB"/>
+            <policy domain="resource" name="width" value="16KP"/>
+            <policy domain="resource" name="height" value="16KP"/>
+            <policy domain="resource" name="area" value="128MB"/>
+            <policy domain="resource" name="disk" value="1GiB"/>
+            <policy domain="delegate" rights="read|write" pattern="PDF" />
+            <policy domain="coder" rights="read|write" pattern="PDF" />
+          </policymap>
+          EOF'
           # Verify installation
           magick --version
 
