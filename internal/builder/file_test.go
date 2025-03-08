@@ -1,6 +1,7 @@
 package builder_test
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -40,8 +41,13 @@ func TestFileBuilder_BuildFromPath(t *testing.T) {
 	// Create an encrypted PDF file using qpdf
 	encryptedPath := filepath.Join(tmpDir, "encrypted.pdf")
 	cmd := exec.Command("qpdf", "--encrypt", "password", "password", "40", "--", fixturesPdfPath, encryptedPath)
+	
+	// Capture stderr for debugging
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	
 	if err := cmd.Run(); err != nil {
-		t.Fatalf("failed to create encrypted PDF: %v", err)
+		t.Fatalf("failed to create encrypted PDF: %v, stderr: %s", err, stderr.String())
 	}
 
 	// Table-driven tests
