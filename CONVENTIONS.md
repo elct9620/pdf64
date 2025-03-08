@@ -3,6 +3,11 @@ Coding Guidelines
 
 These are PDF64 coding guidelines. All code must follow these guidelines and use english as the primary language.
 
+Environment
+---
+
+- The minimum Go version is 1.23.
+
 Indentation
 ---
 
