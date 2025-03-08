@@ -1,30 +1,30 @@
 # PDF64
 
-PDF64 是一個將 PDF 文件轉換為 Base64 編碼圖像的工具，方便在網頁應用中顯示和處理 PDF 內容。
+PDF64 is a tool for converting PDF documents to Base64 encoded images, making it convenient to display and process PDF content in web applications.
 
-## 功能特點
+## Features
 
-- 將 PDF 文件轉換為 Base64 編碼的圖像
-- 支持調整圖像密度和質量
-- RESTful API 接口
-- Docker 容器支持
+- Convert PDF files to Base64 encoded images
+- Support for adjusting image density and quality
+- RESTful API interface
+- Docker container support
 
-## 系統需求
+## Requirements
 
 - Go 1.23+
 - ImageMagick 7
 - Ghostscript
 
-## 安裝
+## Installation
 
-### 使用 Docker
+### Using Docker
 
 ```bash
 docker pull ghcr.io/elct9620/pdf64:latest
 docker run -p 8080:8080 ghcr.io/elct9620/pdf64:latest
 ```
 
-### 從源碼構建
+### Building from Source
 
 ```bash
 git clone https://github.com/elct9620/pdf64.git
@@ -32,9 +32,9 @@ cd pdf64
 go build -o pdf64 ./cmd
 ```
 
-## 使用方法
+## Usage
 
-### API 使用
+### API Usage
 
 ```bash
 curl -X POST \
@@ -44,7 +44,7 @@ curl -X POST \
   http://localhost:8080/v1/convert
 ```
 
-### 響應格式
+### Response Format
 
 ```json
 {
@@ -56,29 +56,29 @@ curl -X POST \
 }
 ```
 
-## 開發
+## Development
 
 ```bash
-# 運行測試
+# Run tests
 go test -v -cover ./...
 
-# 運行 linter
+# Run linter
 golangci-lint run
 ```
 
-## 項目結構
+## Project Structure
 
-- `cmd/`: 主應用程序入口
-- `pkg/`: 公共包
-  - `apis/`: API 接口定義
-- `internal/`: 私有包
-  - `app/`: 應用程序配置
-  - `controller/`: API 控制器
-  - `builder/`: 工廠模式實現
-  - `entity/`: 領域實體
-  - `service/`: 服務實現
-  - `usecase/`: 業務邏輯
+- `cmd/`: Main application entry point
+- `pkg/`: Public packages
+  - `apis/`: API interface definitions
+- `internal/`: Private packages
+  - `app/`: Application configuration
+  - `controller/`: API controllers
+  - `builder/`: Factory pattern implementations
+  - `entity/`: Domain entities
+  - `service/`: Service implementations
+  - `usecase/`: Business logic
 
-## 授權
+## License
 
-本項目採用 MIT 授權。
+This project is licensed under the MIT License.
