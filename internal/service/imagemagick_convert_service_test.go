@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/elct9620/pdf64/internal/entity"
@@ -14,7 +15,10 @@ import (
 func TestImageMagickConvertService_Convert(t *testing.T) {
 	// Use the real PDF file from fixtures
 	// Get the absolute path to the fixtures directory from project root
-	pdfPath := filepath.Join("fixtures", "dummy.pdf")
+	// First find the project root directory
+	_, currentFile, _, _ := runtime.Caller(0)
+	projectRoot := filepath.Dir(filepath.Dir(filepath.Dir(currentFile)))
+	pdfPath := filepath.Join(projectRoot, "fixtures", "dummy.pdf")
 
 	// Verify the test PDF file exists
 	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
