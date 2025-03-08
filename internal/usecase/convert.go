@@ -1,6 +1,13 @@
 package usecase
 
-import "context"
+import (
+	"context"
+	"errors"
+)
+
+var (
+	ErrPasswordRequired = errors.New("password is required for encrypted PDF")
+)
 
 type ConvertInput struct {
 	FilePath string
@@ -17,12 +24,14 @@ type ConvertOutput struct {
 type ConvertUsecase struct {
 	builder   FileBuilder
 	converter ImageConvertService
+	decrypter PdfDecryptService
 }
 
-func NewConvertUsecase(builder FileBuilder, converter ImageConvertService) *ConvertUsecase {
+func NewConvertUsecase(builder FileBuilder, converter ImageConvertService, decrypter PdfDecryptService) *ConvertUsecase {
 	return &ConvertUsecase{
 		builder:   builder,
 		converter: converter,
+		decrypter: decrypter,
 	}
 }
 
@@ -30,6 +39,17 @@ func (u *ConvertUsecase) Execute(ctx context.Context, input *ConvertInput) (*Con
 	file, err := u.builder.BuildFromPath(input.FilePath)
 	if err != nil {
 		return nil, err
+	}
+
+	isPasswordGiven := input.Password != ""
+	if file.IsEncrypted() {
+		if !isPasswordGiven {
+			return nil, ErrPasswordRequired
+		}
+
+		if err = u.decrypter.Decrypt(ctx, file, input.Password); err != nil {
+			return nil, err
+		}
 	}
 
 	images, err := u.converter.Convert(ctx, file, ImageConvertOptions{

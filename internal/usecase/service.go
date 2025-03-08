@@ -14,3 +14,7 @@ type ImageConvertOptions struct {
 type ImageConvertService interface {
 	Convert(ctx context.Context, file *entity.File, options ImageConvertOptions) ([]string, error)
 }
+
+type PdfDecryptService interface {
+	Decrypt(ctx context.Context, file *entity.File, password string) error
+}
