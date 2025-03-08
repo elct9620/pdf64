@@ -34,9 +34,23 @@ func (s *Service) Convert(ctx context.Context, req *v1.ConvertRequest) (*v1.Conv
 	// Delete temporary file when function exits
 	defer os.Remove(filePath)
 	
+	// Parse quality parameter
+	quality := 90 // Default quality
+	if req.Quality > 0 {
+		quality = req.Quality
+	}
+
+	// Use density from request or default
+	density := "150" // Default density
+	if req.Density != "" {
+		density = req.Density
+	}
+
 	// Execute conversion use case
 	out, err := s.convertUsecase.Execute(ctx, &usecase.ConvertInput{
 		FilePath: filePath,
+		Density:  density,
+		Quality:  quality,
 	})
 	if err != nil {
 		return nil, err

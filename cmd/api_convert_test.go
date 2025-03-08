@@ -13,6 +13,7 @@ import (
 	"github.com/elct9620/pdf64/internal/app"
 	"github.com/elct9620/pdf64/internal/builder"
 	v1 "github.com/elct9620/pdf64/internal/controller/v1"
+	"github.com/elct9620/pdf64/internal/service"
 	"github.com/elct9620/pdf64/internal/usecase"
 	apiV1 "github.com/elct9620/pdf64/pkg/apis/v1"
 )
@@ -64,7 +65,8 @@ func TestApiV1Convert(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup dependencies for testing
 			fileBuilder := builder.NewFileBuilder()
-			convertUsecase := usecase.NewConvertUsecase(fileBuilder)
+			imageConvertService := service.NewImageMagickConvertService()
+			convertUsecase := usecase.NewConvertUsecase(fileBuilder, imageConvertService)
 			apiV1Service := v1.NewService(convertUsecase)
 			server := app.NewServer(apiV1Service)
 
