@@ -7,9 +7,10 @@ import (
 )
 
 type ConvertRequest struct {
-	Density string `json:"density"`
-	Quality int    `json:"quality"`
-	File    io.ReadCloser
+	Password string `json:"password"`
+	Density  string `json:"density"`
+	Quality  int    `json:"quality"`
+	File     io.ReadCloser
 }
 
 type ConvertResponse struct {
