@@ -14,9 +14,6 @@ type ServiceImpl interface {
 	Convert(ctx context.Context, req *ConvertRequest) (*ConvertResponse, error)
 }
 
-type Service struct {
-}
-
 func Register(r chi.Router, impl ServiceImpl) {
 	r.Post("/v1/convert", PostConvert(impl))
 }
