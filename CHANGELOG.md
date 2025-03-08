@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0](https://github.com/elct9620/pdf64/compare/v1.0.3...v1.1.0) (2025-03-08)
+
+
+### Features
+
+* Add curl to Dockerfile for health check support ([5a97c65](https://github.com/elct9620/pdf64/commit/5a97c6559b73f3c376c611b8e2234e6573e6f1dd))
+* Add Docker health check with curl to monitor container status ([2ab3435](https://github.com/elct9620/pdf64/commit/2ab343533d792a9008bce1379bbc0c69bd594838))
+* Add healthz endpoint and quiet logging for health checks ([fa804b1](https://github.com/elct9620/pdf64/commit/fa804b14c36b89b0014357185df89806607d09a0))
+
+
+### Bug Fixes
+
+* Update Dockerfile health check endpoint to /livez ([2f55185](https://github.com/elct9620/pdf64/commit/2f55185647bcbf7327e3822aaedc71cd369183be))
+
 ## [1.0.3](https://github.com/elct9620/pdf64/compare/v1.0.2...v1.0.3) (2025-03-08)
 
 
