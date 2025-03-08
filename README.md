@@ -6,6 +6,7 @@ PDF64 is a tool for converting PDF documents to Base64 encoded images, making it
 
 - Convert PDF files to Base64 encoded images
 - Support for adjusting image density and quality
+- Support for password-protected PDF files
 - RESTful API interface
 - Docker container support
 
@@ -38,8 +39,17 @@ go build -o pdf64 ./cmd
 ### API Usage
 
 ```bash
+# Basic usage
 curl -X POST \
-  -F "data=@example.pdf" \
+  -F "file=@example.pdf" \
+  -F "density=300" \
+  -F "quality=90" \
+  http://localhost:8080/v1/convert
+
+# For password-protected PDF files
+curl -X POST \
+  -F "file=@encrypted.pdf" \
+  -F "password=your_password" \
   -F "density=300" \
   -F "quality=90" \
   http://localhost:8080/v1/convert
