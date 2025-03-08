@@ -13,9 +13,9 @@ import (
 
 func TestImageMagickConvertService_Convert(t *testing.T) {
 	// Skip test if ImageMagick is not installed
-	_, err := os.Stat("/usr/bin/convert")
+	_, err := os.Stat("/usr/bin/magick")
 	if os.IsNotExist(err) {
-		t.Skip("ImageMagick convert command not found, skipping test")
+		t.Skip("ImageMagick magick command not found, skipping test")
 	}
 
 	// Create a test PDF file

@@ -42,8 +42,8 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 		outputPattern,
 	}
 
-	// Execute convert command
-	cmd := exec.CommandContext(ctx, "convert", args...)
+	// Execute magick command (ImageMagick 7)
+	cmd := exec.CommandContext(ctx, "magick", args...)
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("failed to convert PDF to images: %w", err)
 	}
