@@ -10,35 +10,9 @@ import (
 )
 
 func TestFileBuilder_BuildFromPath(t *testing.T) {
-	// Arrange
-	fileBuilder := builder.NewFileBuilder()
-	path := "/path/to/file.pdf"
-
-	// Act
-	file, err := fileBuilder.BuildFromPath(path)
-
-	// Assert
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-
-	if file == nil {
-		t.Fatal("expected file to not be nil")
-	}
-
-	if file.Path() != path {
-		t.Errorf("expected path to be %q, got %q", path, file.Path())
-	}
-
-	if file.Id() == "" {
-		t.Error("expected ID to not be empty")
-	}
-}
-
-func TestFileBuilder_BuildFromPath_WithEncryptedFile(t *testing.T) {
-	// Skip if qpdf is not installed
+	// Ensure qpdf is installed
 	if _, err := exec.LookPath("qpdf"); err != nil {
-		t.Skip("qpdf not installed, skipping test")
+		t.Fatalf("qpdf is required for testing: %v", err)
 	}
 
 	// Create a temporary directory
@@ -56,28 +30,66 @@ func TestFileBuilder_BuildFromPath_WithEncryptedFile(t *testing.T) {
 
 	// Create an encrypted PDF file using qpdf
 	encryptedPath := filepath.Join(tmpDir, "encrypted.pdf")
-	cmd := exec.Command("qpdf", "--encrypt", "user", "owner", "128", "--", unencryptedPath, encryptedPath)
+	cmd := exec.Command("qpdf", "--encrypt", "password", "password", "40", "--", unencryptedPath, encryptedPath)
 	if err := cmd.Run(); err != nil {
 		t.Fatalf("failed to create encrypted PDF: %v", err)
 	}
 
-	// Test with unencrypted file
-	fileBuilder := builder.NewFileBuilder()
-	
-	unencryptedFile, err := fileBuilder.BuildFromPath(unencryptedPath)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-	if unencryptedFile.IsEncrypted() {
-		t.Error("unencrypted file should not be marked as encrypted")
+	// Table-driven tests
+	tests := []struct {
+		name           string
+		path           string
+		expectedId     bool
+		expectedPath   string
+		expectedEncrypted bool
+	}{
+		{
+			name:             "Basic File",
+			path:             "/path/to/file.pdf",
+			expectedId:       true,
+			expectedPath:     "/path/to/file.pdf",
+			expectedEncrypted: false,
+		},
+		{
+			name:             "Unencrypted PDF",
+			path:             unencryptedPath,
+			expectedId:       true,
+			expectedPath:     unencryptedPath,
+			expectedEncrypted: false,
+		},
+		{
+			name:             "Encrypted PDF",
+			path:             encryptedPath,
+			expectedId:       true,
+			expectedPath:     encryptedPath,
+			expectedEncrypted: true,
+		},
 	}
 
-	// Test with encrypted file
-	encryptedFile, err := fileBuilder.BuildFromPath(encryptedPath)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-	if !encryptedFile.IsEncrypted() {
-		t.Error("encrypted file should be marked as encrypted")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fileBuilder := builder.NewFileBuilder()
+			file, err := fileBuilder.BuildFromPath(tt.path)
+
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+
+			if file == nil {
+				t.Fatal("expected file to not be nil")
+			}
+
+			if tt.expectedId && file.Id() == "" {
+				t.Error("expected ID to not be empty")
+			}
+
+			if file.Path() != tt.expectedPath {
+				t.Errorf("expected path to be %q, got %q", tt.expectedPath, file.Path())
+			}
+
+			if file.IsEncrypted() != tt.expectedEncrypted {
+				t.Errorf("expected IsEncrypted() to be %v, got %v", tt.expectedEncrypted, file.IsEncrypted())
+			}
+		})
 	}
 }
