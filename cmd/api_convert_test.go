@@ -115,7 +115,7 @@ func TestApiV1Convert(t *testing.T) {
 			isEncrypted:       true,
 			requirePassword:   true,
 			expectedStatus:    http.StatusBadRequest,
-			expectedErrorCode: apiV1.ErrCodeBadRequest,
+			expectedErrorCode: apiV1.ErrCodePasswordRequired,
 		},
 		{
 			name:            "Invalid Quality Parameter Test",
@@ -201,8 +201,7 @@ func TestApiV1Convert(t *testing.T) {
 				t.Fatalf("response is not valid JSON: %s", respBody)
 			}
 
-			err = json.Unmarshal(respBody, &resp)
-			if err != nil {
+			if err := json.Unmarshal(respBody, &resp); err != nil {
 				t.Fatalf("failed to unmarshal response: %v", err)
 			}
 

@@ -6,6 +6,7 @@ const (
 	ErrCodeMaxFileSize ErrorCode = iota + 1
 	ErrCodeBadRequest
 	ErrCodeInternal
+	ErrCodePasswordRequired
 )
 
 type Error struct {
