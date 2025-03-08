@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git
@@ -23,7 +23,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o 
 FROM alpine:3.19
 
 # Install runtime dependencies
-RUN apk add --no-cache imagemagick
+RUN apk add --no-cache imagemagick ghostscript
 
 # Create a non-root user
 RUN addgroup -S app && adduser -S app -G app
