@@ -42,7 +42,6 @@ func TestFileBuilder_BuildFromPath(t *testing.T) {
 	encryptedPath := filepath.Join(tmpDir, "encrypted.pdf")
 	
 	// Try different qpdf encryption commands based on version
-	var err error
 	var stderr bytes.Buffer
 	
 	// First try with 256-bit AES encryption (newer qpdf versions)
