@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/elct9620/pdf64/internal/entity"
@@ -12,7 +13,8 @@ import (
 
 func TestImageMagickConvertService_Convert(t *testing.T) {
 	// Use the real PDF file from fixtures
-	pdfPath := "fixtures/dummy.pdf"
+	// Get the absolute path to the fixtures directory from project root
+	pdfPath := filepath.Join("fixtures", "dummy.pdf")
 
 	// Verify the test PDF file exists
 	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
