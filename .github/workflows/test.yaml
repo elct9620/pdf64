@@ -69,7 +69,7 @@ jobs:
 </policymap>
 EOF'
           # Verify installation
-          convert --version
+          magick --version
 
       - name: Run tests
         run: go test -v -cover ./...
