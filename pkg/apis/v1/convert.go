@@ -20,12 +20,6 @@ type ConvertResponse struct {
 
 func PostConvert(impl ServiceImpl) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// 檢查請求方法
-		if r.Method != http.MethodPost {
-			http.Error(w, "只允許 POST 請求", http.StatusMethodNotAllowed)
-			return
-		}
-
 		// 解析多部分表單，32 MB 是最大記憶體
 		err := r.ParseMultipartForm(32 << 20)
 		if err != nil {
@@ -33,25 +27,18 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 			return
 		}
 
-		// 獲取表單參數
+		// 獲取可選的表單參數
 		density := r.FormValue("density")
-		if density == "" {
-			http.Error(w, "缺少 density 參數", http.StatusBadRequest)
-			return
-		}
-
-		// 解析 quality 參數
-		qualityStr := r.FormValue("quality")
-		if qualityStr == "" {
-			http.Error(w, "缺少 quality 參數", http.StatusBadRequest)
-			return
-		}
 		
+		// 解析可選的 quality 參數
 		quality := 0
-		quality, err = strconv.Atoi(qualityStr)
-		if err != nil {
-			http.Error(w, "quality 參數必須是整數", http.StatusBadRequest)
-			return
+		qualityStr := r.FormValue("quality")
+		if qualityStr != "" {
+			quality, err = strconv.Atoi(qualityStr)
+			if err != nil {
+				http.Error(w, "quality 參數必須是整數", http.StatusBadRequest)
+				return
+			}
 		}
 
 		// 獲取上傳的檔案
