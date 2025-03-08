@@ -7,6 +7,7 @@ Environment
 ---
 
 - The minimum Go version is 1.23.
+- The `imagemagick7` and `ghostscript` are required.
 
 Indentation
 ---
