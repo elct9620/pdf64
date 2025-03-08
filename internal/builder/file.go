@@ -2,6 +2,7 @@ package builder
 
 import (
 	"os/exec"
+
 	"github.com/elct9620/pdf64/internal/entity"
 	"github.com/google/uuid"
 )
@@ -20,14 +21,14 @@ func (b *FileBuilder) BuildFromPath(path string) (*entity.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	file := entity.NewFile(id.String(), path)
-	
+
 	// Check if the file is encrypted using qpdf
 	if b.isEncrypted(path) {
 		file.Encrypt()
 	}
-	
+
 	return file, nil
 }
 
@@ -35,7 +36,7 @@ func (b *FileBuilder) BuildFromPath(path string) (*entity.File, error) {
 func (b *FileBuilder) isEncrypted(path string) bool {
 	cmd := exec.Command("qpdf", "--is-encrypted", path)
 	err := cmd.Run()
-	
+
 	// Return code 0 means the file is encrypted
 	return err == nil
 }

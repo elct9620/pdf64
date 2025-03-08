@@ -12,28 +12,31 @@ import (
 
 func (s *Service) Convert(ctx context.Context, req *v1.ConvertRequest) (*v1.ConvertResponse, error) {
 	// Create temporary file
-	tmpDir := os.TempDir()
+	tmpDir, err := os.MkdirTemp("", "pdf64-")
+	if err != nil {
+		return nil, err
+	}
 	filePath := filepath.Join(tmpDir, "upload.pdf")
-	
+
 	// Create temporary file
 	tmpFile, err := os.Create(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer tmpFile.Close()
-	
+
 	// Copy uploaded file content to temporary file
 	_, err = io.Copy(tmpFile, req.File)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Ensure file is written and closed
 	tmpFile.Close()
-	
+
 	// Delete temporary file when function exits
 	defer os.Remove(filePath)
-	
+
 	// Parse quality parameter
 	quality := 90 // Default quality
 	if req.Quality > 0 {
