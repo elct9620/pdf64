@@ -36,6 +36,7 @@ Source Code Organization
 - `controller` to implement the API interface.
 - `repository` to implement the data access layer.
 - `builder` to implement the factory for domain entities.
+- `service` to implement the usecase interface which is details of the business logic.
 - `usecase` to implement the business logic.
 - `entity` to define the domain entities.
 
