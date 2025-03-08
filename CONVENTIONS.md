@@ -29,6 +29,8 @@ Only use english comments for GoDoc documentation. Do not write any comments for
 Source Code Organization
 ---
 
+We are following the Clean Architecture pattern. The project structure is as follows:
+
 - `pkg` for public packages.
 - `internal` for private packages.
 - `cmd` for main applications.
