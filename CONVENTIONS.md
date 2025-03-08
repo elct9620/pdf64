@@ -20,6 +20,7 @@ Naming Conventions
 - Use PascalCase for type names and public members.
 - Use camelCase for local variables and method arguments.
 - Use whole words in names when possible.
+- Use `has` or `is` prefix for boolean variables and methods.
 
 Comments
 ---
