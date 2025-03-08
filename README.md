@@ -14,6 +14,7 @@ PDF64 is a tool for converting PDF documents to Base64 encoded images, making it
 - Go 1.23+
 - ImageMagick 7
 - Ghostscript
+- QPDF
 
 ## Installation
 
@@ -66,19 +67,9 @@ go test -v -cover ./...
 golangci-lint run
 ```
 
-## Project Structure
-
-- `cmd/`: Main application entry point
-- `pkg/`: Public packages
-  - `apis/`: API interface definitions
-- `internal/`: Private packages
-  - `app/`: Application configuration
-  - `controller/`: API controllers
-  - `builder/`: Factory pattern implementations
-  - `entity/`: Domain entities
-  - `service/`: Service implementations
-  - `usecase/`: Business logic
-
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+
+Due to the use of Ghostscript (AGPL-3.0), ImageMagick (Apache-2.0), and QPDF (Apache-2.0) as dependencies, 
+we have chosen the AGPL-3.0 license to ensure compliance with all dependency licenses.
