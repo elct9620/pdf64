@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/elct9620/pdf64/internal/entity"
@@ -37,24 +38,27 @@ func TestImageMagickConvertService_Convert(t *testing.T) {
 		Quality: 90,
 	}
 
-	// Convert the PDF to images
-	imagePaths, err := service.Convert(context.Background(), file, options)
+	// Convert the PDF to images - this returns base64 encoded images, not file paths
+	encodedImages, err := service.Convert(context.Background(), file, options)
 	if err != nil {
 		t.Fatalf("Failed to convert PDF to images: %v", err)
 	}
 
-	// Verify we got image paths
-	if len(imagePaths) == 0 {
-		t.Error("Expected at least one image path, got none")
+	// Verify we got encoded images
+	if len(encodedImages) == 0 {
+		t.Error("Expected at least one encoded image, got none")
 	}
 
-	// Check that the returned paths exist
-	for _, path := range imagePaths {
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			t.Errorf("Image path does not exist: %s", path)
-		} else {
-			// Clean up the generated image files
-			os.Remove(path)
+	// Check that the returned strings are valid base64 encoded data
+	for i, encodedImage := range encodedImages {
+		if len(encodedImage) == 0 {
+			t.Errorf("Encoded image %d is empty", i)
+			continue
+		}
+		
+		// Check if the string starts with the base64 image prefix
+		if !strings.HasPrefix(encodedImage, "data:image/") {
+			t.Errorf("Encoded image %d does not have valid image data prefix", i)
 		}
 	}
 }
