@@ -29,7 +29,7 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 
 		// 獲取可選的表單參數
 		density := r.FormValue("density")
-		
+
 		// 解析可選的 quality 參數
 		quality := 0
 		qualityStr := r.FormValue("quality")
@@ -57,7 +57,7 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 		}
 
 		// 呼叫實現的 Convert 方法
-		resp, err := impl.Convert(r.Context(), req)
+		resp, err := impl.Convert(r.Context(), &req)
 		if err != nil {
 			http.Error(w, "轉換失敗: "+err.Error(), http.StatusInternalServerError)
 			return
