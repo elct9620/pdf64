@@ -13,10 +13,10 @@ import (
 	"github.com/elct9620/pdf64/internal/app"
 	v1 "github.com/elct9620/pdf64/internal/controller/v1"
 	apiV1 "github.com/elct9620/pdf64/pkg/apis/v1"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestApiV1Convert(t *testing.T) {
+	// 使用表格驅動測試
 	tests := []struct {
 		name           string
 		density        string
@@ -32,8 +32,12 @@ func TestApiV1Convert(t *testing.T) {
 			fileContent:    "測試PDF內容",
 			expectedStatus: http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
-				assert.NotEmpty(t, resp.Id)
-				assert.NotNil(t, resp.Data)
+				if resp.Id == "" {
+					t.Errorf("expected non-empty ID, got empty string")
+				}
+				if resp.Data == nil {
+					t.Errorf("expected non-nil Data, got nil")
+				}
 			},
 		},
 	}
@@ -53,9 +57,18 @@ func TestApiV1Convert(t *testing.T) {
 			_ = writer.WriteField("quality", tt.quality)
 			
 			// 添加文件
-			part, _ := writer.CreateFormFile("data", "test.pdf")
-			io.Copy(part, strings.NewReader(tt.fileContent))
-			writer.Close()
+			part, err := writer.CreateFormFile("data", "test.pdf")
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = io.Copy(part, strings.NewReader(tt.fileContent))
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = writer.Close()
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			// 創建請求
 			req := httptest.NewRequest("POST", "/v1/convert", body)
@@ -66,13 +79,17 @@ func TestApiV1Convert(t *testing.T) {
 			server.ServeHTTP(recorder, req)
 
 			// 檢查狀態碼
-			assert.Equal(t, tt.expectedStatus, recorder.Code)
+			if recorder.Code != tt.expectedStatus {
+				t.Errorf("expected status code %d, got %d", tt.expectedStatus, recorder.Code)
+			}
 
 			// 解析並驗證回應
 			if tt.expectedStatus == http.StatusOK {
 				var resp apiV1.ConvertResponse
 				err := json.Unmarshal(recorder.Body.Bytes(), &resp)
-				assert.NoError(t, err)
+				if err != nil {
+					t.Fatalf("failed to unmarshal response: %v", err)
+				}
 				
 				if tt.validateResp != nil {
 					tt.validateResp(t, &resp)
