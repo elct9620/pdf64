@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/elct9620/pdf64/internal/app"
-	"github.com/elct9620/pdf64/internal/builder"
 	v1 "github.com/elct9620/pdf64/internal/controller/v1"
 	"github.com/elct9620/pdf64/internal/entity"
 	"github.com/elct9620/pdf64/internal/usecase"
