@@ -8,19 +8,12 @@ import (
 
 	"github.com/elct9620/pdf64/internal/usecase"
 	v1 "github.com/elct9620/pdf64/pkg/apis/v1"
-	"github.com/google/uuid"
 )
 
 func (s *Service) Convert(ctx context.Context, req *v1.ConvertRequest) (*v1.ConvertResponse, error) {
-
-	id, err := uuid.NewV7()
-	if err != nil {
-		return nil, err
-	}
-
 	// Create temporary file
 	tmpDir := os.TempDir()
-	filePath := filepath.Join(tmpDir, id.String()+".pdf")
+	filePath := filepath.Join(tmpDir, "upload.pdf")
 	
 	// Create temporary file
 	tmpFile, err := os.Create(filePath)
@@ -43,7 +36,6 @@ func (s *Service) Convert(ctx context.Context, req *v1.ConvertRequest) (*v1.Conv
 	
 	// Execute conversion use case
 	out, err := s.convertUsecase.Execute(ctx, &usecase.ConvertInput{
-		FileId:   id.String(),
 		FilePath: filePath,
 	})
 	if err != nil {
