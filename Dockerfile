@@ -45,7 +45,7 @@ ENV PORT=8080
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8080/ || exit 1
+  CMD curl -f http://localhost:8080/livez || exit 1
 
 # Run the application
 CMD ["./pdf64"]
