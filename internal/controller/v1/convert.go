@@ -12,38 +12,37 @@ import (
 )
 
 func (s *Service) Convert(ctx context.Context, req *v1.ConvertRequest) (*v1.ConvertResponse, error) {
-	convert := usecase.NewConvertUsecase()
 
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
 	}
 
-	// 創建臨時檔案
+	// Create temporary file
 	tmpDir := os.TempDir()
 	filePath := filepath.Join(tmpDir, id.String()+".pdf")
 	
-	// 建立臨時檔案
+	// Create temporary file
 	tmpFile, err := os.Create(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer tmpFile.Close()
 	
-	// 將上傳的檔案內容複製到臨時檔案
+	// Copy uploaded file content to temporary file
 	_, err = io.Copy(tmpFile, req.File)
 	if err != nil {
 		return nil, err
 	}
 	
-	// 確保檔案被寫入並關閉
+	// Ensure file is written and closed
 	tmpFile.Close()
 	
-	// 在函數結束時刪除臨時檔案
+	// Delete temporary file when function exits
 	defer os.Remove(filePath)
 	
-	// 執行轉換用例
-	out, err := convert.Execute(ctx, &usecase.ConvertInput{
+	// Execute conversion use case
+	out, err := s.convertUsecase.Execute(ctx, &usecase.ConvertInput{
 		FileId:   id.String(),
 		FilePath: filePath,
 	})
