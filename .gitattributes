@@ -1,0 +1,13 @@
+# Git attributes for PDF64 project
+
+# Treat PDF files as binary
+*.pdf binary
+
+# Use Git LFS for PDF files
+fixtures/*.pdf filter=lfs diff=lfs merge=lfs -text
+
+# Default text files should have normalized line endings
+* text=auto
+
+# Go source files should always have LF line endings
+*.go text eol=lf
