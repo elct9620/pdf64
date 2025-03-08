@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -72,7 +71,7 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 	var base64Images []string
 	for _, imagePath := range imagePaths {
 		// Read image file
-		imageData, err := ioutil.ReadFile(imagePath)
+		imageData, err := os.ReadFile(imagePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read image file: %w", err)
 		}
