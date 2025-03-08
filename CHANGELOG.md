@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/elct9620/pdf64/compare/v1.0.0...v1.0.1) (2025-03-08)
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([edd5a72](https://github.com/elct9620/pdf64/commit/edd5a72a18c8bcf36ca755bc9e0844a39cf30d48))
+
 ## 1.0.0 (2025-03-08)
 
 
