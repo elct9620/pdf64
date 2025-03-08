@@ -6,13 +6,15 @@ import (
 	"github.com/elct9620/pdf64/internal/app"
 	"github.com/elct9620/pdf64/internal/builder"
 	v1 "github.com/elct9620/pdf64/internal/controller/v1"
+	"github.com/elct9620/pdf64/internal/service"
 	"github.com/elct9620/pdf64/internal/usecase"
 )
 
 func main() {
 	// Initialize dependencies
 	fileBuilder := builder.NewFileBuilder()
-	convertUsecase := usecase.NewConvertUsecase(fileBuilder)
+	imageConvertService := service.NewImageMagickConvertService()
+	convertUsecase := usecase.NewConvertUsecase(fileBuilder, imageConvertService)
 	
 	// Initialize controllers
 	apiV1 := v1.NewService(convertUsecase)
