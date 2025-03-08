@@ -18,7 +18,7 @@ Naming Conventions
 Comments
 ---
 
-Only use comments for GoDoc documentation. Do not use comments for code explanations, try to write self-explanatory code.
+Only use english comments for GoDoc documentation. Do not write any comments for code explanations, try to write self-explanatory code.
 
 Source Code Organization
 ---
@@ -35,6 +35,7 @@ Source Code Organization
 
 - `controller` to implement the API interface.
 - `repository` to implement the data access layer.
+- `builder` to implement the factory for domain entities.
 - `usecase` to implement the business logic.
 - `entity` to define the domain entities.
 
