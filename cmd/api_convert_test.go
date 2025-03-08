@@ -33,6 +33,7 @@ func TestApiV1Convert(t *testing.T) {
 		name           string
 		density        string
 		quality        string
+		password       string
 		fileContent    string
 		expectedStatus int
 		validateResp   func(t *testing.T, resp *apiV1.ConvertResponse)
@@ -41,6 +42,7 @@ func TestApiV1Convert(t *testing.T) {
 			name:           "Basic Conversion Test",
 			density:        "300",
 			quality:        "90",
+			password:       "",
 			fileContent:    "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
 			expectedStatus: http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
@@ -58,9 +60,27 @@ func TestApiV1Convert(t *testing.T) {
 			},
 		},
 		{
+			name:           "Password Protected PDF Test",
+			density:        "300",
+			quality:        "90",
+			password:       "secret123",
+			fileContent:    "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
+			expectedStatus: http.StatusOK,
+			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
+				if len(resp.Id) < 32 {
+					t.Errorf("expected UUID format for Id, got: %s", resp.Id)
+				}
+				
+				if len(resp.Data) == 0 {
+					t.Errorf("expected non-empty Data array")
+				}
+			},
+		},
+		{
 			name:           "Invalid Quality Parameter Test",
 			density:        "300",
 			quality:        "invalid",
+			password:       "",
 			fileContent:    "Test PDF Content",
 			expectedStatus: http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
@@ -88,6 +108,9 @@ func TestApiV1Convert(t *testing.T) {
 			
 			_ = writer.WriteField("density", tt.density)
 			_ = writer.WriteField("quality", tt.quality)
+			if tt.password != "" {
+				_ = writer.WriteField("password", tt.password)
+			}
 			
 			part, err := writer.CreateFormFile("data", "test.pdf")
 			if err != nil {
