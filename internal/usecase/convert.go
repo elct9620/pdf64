@@ -13,15 +13,23 @@ type ConvertOutput struct {
 }
 
 type ConvertUsecase struct {
+	builder FileBuilder
 }
 
-func NewConvertUsecase() *ConvertUsecase {
-	return &ConvertUsecase{}
+func NewConvertUsecase(builder FileBuilder) *ConvertUsecase {
+	return &ConvertUsecase{
+		builder: builder,
+	}
 }
 
 func (u *ConvertUsecase) Execute(ctx context.Context, input *ConvertInput) (*ConvertOutput, error) {
+	file, err := u.builder.BuildFromPath(input.FilePath)
+	if err != nil {
+		return nil, err
+	}
+
 	return &ConvertOutput{
-		FileId:        input.FileId,
+		FileId:        file.Id(),
 		EncodedImages: []string{},
 	}, nil
 }
