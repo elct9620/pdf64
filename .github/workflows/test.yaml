@@ -42,36 +42,14 @@ jobs:
           go-version: '1.23'
           cache: true
 
-      - name: Install ImageMagick 7 and Ghostscript
+      - name: Install ImageMagick 6 and Ghostscript
         run: |
           sudo apt-get update
-          sudo apt-get install -y ghostscript
-          # Install ImageMagick 7 from source
-          cd /tmp
-          wget https://imagemagick.org/archive/ImageMagick.tar.gz
-          tar xvzf ImageMagick.tar.gz
-          cd ImageMagick-*
-          ./configure
-          make -j$(nproc)
-          sudo make install
-          sudo ldconfig
+          sudo apt-get install -y imagemagick ghostscript
           # Configure ImageMagick policy to allow PDF conversion
-          sudo mkdir -p /etc/ImageMagick-7
-          sudo cp /usr/local/etc/ImageMagick-7/policy.xml /etc/ImageMagick-7/ || true
-          sudo bash -c 'cat > /etc/ImageMagick-7/policy.xml << EOF
-          <policymap>
-            <policy domain="resource" name="memory" value="256MiB"/>
-            <policy domain="resource" name="map" value="512MiB"/>
-            <policy domain="resource" name="width" value="16KP"/>
-            <policy domain="resource" name="height" value="16KP"/>
-            <policy domain="resource" name="area" value="128MB"/>
-            <policy domain="resource" name="disk" value="1GiB"/>
-            <policy domain="delegate" rights="read|write" pattern="PDF" />
-            <policy domain="coder" rights="read|write" pattern="PDF" />
-          </policymap>
-          EOF'
+          sudo sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
           # Verify installation
-          magick --version
+          convert --version
 
       - name: Run tests
         run: go test -v -cover ./...
