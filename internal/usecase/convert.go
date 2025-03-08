@@ -4,6 +4,7 @@ import "context"
 
 type ConvertInput struct {
 	FilePath string
+	Password string
 	Density  string
 	Quality  int
 }
