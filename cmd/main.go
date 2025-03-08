@@ -14,7 +14,8 @@ func main() {
 	// Initialize dependencies
 	fileBuilder := builder.NewFileBuilder()
 	imageConvertService := service.NewImageMagickConvertService()
-	convertUsecase := usecase.NewConvertUsecase(fileBuilder, imageConvertService)
+	pdfDecryptService := service.NewQpdfDecryptService()
+	convertUsecase := usecase.NewConvertUsecase(fileBuilder, imageConvertService, pdfDecryptService)
 	
 	// Initialize controllers
 	apiV1 := v1.NewService(convertUsecase)
