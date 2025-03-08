@@ -19,7 +19,7 @@ Naming Conventions
 
 - Use PascalCase for type names and public members.
 - Use camelCase for local variables and method arguments.
-- Use whold words in names when possible.
+- Use whole words in names when possible.
 
 Comments
 ---
