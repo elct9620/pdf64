@@ -38,38 +38,16 @@ func TestFileBuilder_BuildFromPath(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	// Create an encrypted PDF file using qpdf
+	// Create an encrypted PDF file using qpdf with 256-bit encryption
 	encryptedPath := filepath.Join(tmpDir, "encrypted.pdf")
 	
-	// Try different qpdf encryption commands based on version
 	var stderr bytes.Buffer
-	
-	// First try with 256-bit AES encryption (newer qpdf versions)
 	cmd := exec.Command("qpdf", "--encrypt", "password", "password", "256", "--", fixturesPdfPath, encryptedPath)
 	cmd.Stderr = &stderr
 	err = cmd.Run()
 	
-	// If that fails, try with 128-bit encryption
 	if err != nil {
-		stderr.Reset()
-		cmd = exec.Command("qpdf", "--encrypt", "password", "password", "128", "--", fixturesPdfPath, encryptedPath)
-		cmd.Stderr = &stderr
-		err = cmd.Run()
-	}
-	
-	// If that also fails, try with 40-bit encryption
-	if err != nil {
-		stderr.Reset()
-		cmd = exec.Command("qpdf", "--encrypt", "password", "password", "40", "--", fixturesPdfPath, encryptedPath)
-		cmd.Stderr = &stderr
-		err = cmd.Run()
-	}
-	
-	// If all encryption attempts fail, skip the encrypted PDF test
-	if err != nil {
-		t.Logf("Warning: Could not create encrypted PDF: %v, stderr: %s", err, stderr.String())
-		t.Log("Skipping encrypted PDF test")
-		encryptedPath = fixturesPdfPath // Use the unencrypted PDF as a fallback
+		t.Fatalf("failed to create encrypted PDF: %v, stderr: %s", err, stderr.String())
 	}
 
 	// Table-driven tests
@@ -99,7 +77,7 @@ func TestFileBuilder_BuildFromPath(t *testing.T) {
 			path:              encryptedPath,
 			expectedId:        true,
 			expectedPath:      encryptedPath,
-			expectedEncrypted: encryptedPath != fixturesPdfPath, // Only expect encrypted if we successfully created one
+			expectedEncrypted: true,
 		},
 	}
 
