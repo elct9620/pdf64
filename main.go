@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"net/http"
+
+	"github.com/elct9620/pdf64/internal/app"
+	v1 "github.com/elct9620/pdf64/internal/controller/v1"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	apiV1 := v1.NewService()
+	server := app.NewServer(apiV1)
+
+	if err := http.ListenAndServe(":8080", server); err != nil {
+		panic(err)
+	}
 }
