@@ -1,6 +1,8 @@
 Coding Guidelines
 ===
 
+These are PDF64 coding guidelines. All code must follow these guidelines and use english as the primary language.
+
 Indentation
 ---
 
@@ -32,6 +34,7 @@ Source Code Organization
 ### Internal Packages
 
 - `controller` to implement the API interface.
+- `repository` to implement the data access layer.
 - `usecase` to implement the business logic.
 - `entity` to define the domain entities.
 
