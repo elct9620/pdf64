@@ -3,7 +3,6 @@ package usecase
 import "context"
 
 type ConvertInput struct {
-	FileId   string
 	FilePath string
 }
 
