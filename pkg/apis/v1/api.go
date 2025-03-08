@@ -22,7 +22,7 @@ func Register(r chi.Router, impl ServiceImpl) {
 	r.Post("/v1/convert", PostConvert(impl))
 }
 
-func respondWithError(w http.ResponseWriter, err Error, statusCode int, originalErr error) {
+func respondWithError(w http.ResponseWriter, r *http.Request, err Error, statusCode int, originalErr error) {
 	// 記錄錯誤到日誌
 	if originalErr != nil {
 		ctx := r.Context()
