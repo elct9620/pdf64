@@ -2,8 +2,11 @@ package v1
 
 import (
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/httplog/v2"
 )
 
 type ConvertRequest struct {
@@ -19,12 +22,15 @@ type ConvertResponse struct {
 
 func PostConvert(impl ServiceImpl) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
 		err := r.ParseMultipartForm(32 << 20)
 		if err != nil {
 			respondWithError(w, Error{
 				Code:    ErrCodeBadRequest,
 				Message: "Failed to parse form",
 			}, http.StatusBadRequest)
+			httplog.LogEntrySetField(ctx, "error", slog.AnyValue(err))
 			return
 		}
 
@@ -45,6 +51,7 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 				Code:    ErrCodeBadRequest,
 				Message: "Failed to get uploaded file",
 			}, http.StatusBadRequest)
+			httplog.LogEntrySetField(ctx, "error", slog.AnyValue(err))
 			return
 		}
 		defer file.Close()
@@ -65,6 +72,7 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 					Message: "Conversion failed: " + err.Error(),
 				}, http.StatusInternalServerError)
 			}
+			httplog.LogEntrySetField(ctx, "error", slog.AnyValue(err))
 			return
 		}
 

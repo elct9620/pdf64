@@ -5,6 +5,7 @@ import (
 	v1 "github.com/elct9620/pdf64/pkg/apis/v1"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog/v2"
 )
 
 type Server struct {
@@ -14,8 +15,13 @@ type Server struct {
 func NewServer(
 	ctrlV1 *ctrlV1.Service,
 ) *Server {
+	logger := httplog.NewLogger("pdf64", httplog.Options{
+		JSON:    true,
+		Concise: true,
+	})
+
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+	r.Use(httplog.RequestLogger(logger))
 	r.Use(middleware.Recoverer)
 
 	v1.Register(r, ctrlV1)
