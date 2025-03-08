@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/elct9620/pdf64/internal/entity"
 	"github.com/elct9620/pdf64/internal/usecase"
+	"github.com/go-chi/httplog/v2"
 )
 
 // ImageMagickConvertService implements the ImageConvertService interface
@@ -43,28 +45,25 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 		outputPattern,
 	}
 
+	cliPath, err := exec.LookPath("magick")
+	if err != nil {
+		cliPath, err = exec.LookPath("convert")
+		if err != nil {
+			return nil, fmt.Errorf("failed to find ImageMagick command: %w", err)
+		}
+	}
+
 	// Try to execute with magick command (ImageMagick 7)
-	cmd := exec.CommandContext(ctx, "magick", args...)
-	
+	cmd := exec.CommandContext(ctx, cliPath, args...)
+
 	// Capture stdout and stderr
 	var stdout, stderr strings.Builder
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	
-	err = cmd.Run()
-	
-	// If magick command fails, try with convert command (ImageMagick 6)
-	if err != nil {
-		stderr.Reset()
-		stdout.Reset()
-		
-		cmd = exec.CommandContext(ctx, "convert", args...)
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		
-		if err := cmd.Run(); err != nil {
-			return nil, fmt.Errorf("failed to convert PDF to images: %w, stderr: %s", err, stderr.String())
-		}
+
+	if err := cmd.Run(); err != nil {
+		httplog.LogEntrySetField(ctx, "stderr", slog.StringValue(stderr.String()))
+		return nil, fmt.Errorf("failed to convert PDF to images: %w", err)
 	}
 
 	// Collect paths of generated images
@@ -96,10 +95,10 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 
 		// Encode to base64
 		base64Data := base64.StdEncoding.EncodeToString(imageData)
-		
+
 		// Add data URI prefix
 		base64Image := fmt.Sprintf("data:image/jpeg;base64,%s", base64Data)
-		
+
 		base64Images = append(base64Images, base64Image)
 	}
 
