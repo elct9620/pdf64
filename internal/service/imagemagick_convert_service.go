@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,7 +24,7 @@ func NewImageMagickConvertService() *ImageMagickConvertService {
 	return &ImageMagickConvertService{}
 }
 
-// Convert converts a PDF file to images and returns their file paths
+// Convert converts a PDF file to images and returns them as base64 encoded strings
 func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.File, options usecase.ImageConvertOptions) ([]string, error) {
 	// Create temporary directory for output images
 	tmpDir, err := os.MkdirTemp("", "pdf64-images-*")
@@ -66,5 +68,23 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 	// (This is important because ReadDir doesn't guarantee order)
 	sort.Strings(imagePaths)
 
-	return imagePaths, nil
+	// Convert images to base64
+	var base64Images []string
+	for _, imagePath := range imagePaths {
+		// Read image file
+		imageData, err := ioutil.ReadFile(imagePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read image file: %w", err)
+		}
+
+		// Encode to base64
+		base64Data := base64.StdEncoding.EncodeToString(imageData)
+		
+		// Add data URI prefix
+		base64Image := fmt.Sprintf("data:image/jpeg;base64,%s", base64Data)
+		
+		base64Images = append(base64Images, base64Image)
+	}
+
+	return base64Images, nil
 }
