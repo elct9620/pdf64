@@ -44,6 +44,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y imagemagick ghostscript
+          # Configure ImageMagick policy to allow PDF conversion
+          sudo sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
 
       - name: Run tests
         run: go test -v -cover ./...
