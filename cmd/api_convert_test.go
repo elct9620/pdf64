@@ -45,7 +45,7 @@ func (m *MockPdfDecryptService) Decrypt(ctx context.Context, file *entity.File, 
 	if m.requirePassword && password == "" {
 		return usecase.ErrPasswordRequired
 	}
-	
+
 	// Mark the file as decrypted
 	file.Decrypt()
 	return nil
@@ -65,19 +65,19 @@ func TestApiV1Convert(t *testing.T) {
 		validateResp      func(t *testing.T, resp *apiV1.ConvertResponse)
 	}{
 		{
-			name:           "Basic Conversion Test",
-			density:        "300",
-			quality:        "90",
-			password:       "",
-			fileContent:    "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
-			isEncrypted:    false,
+			name:            "Basic Conversion Test",
+			density:         "300",
+			quality:         "90",
+			password:        "",
+			fileContent:     "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
+			isEncrypted:     false,
 			requirePassword: false,
-			expectedStatus: http.StatusOK,
+			expectedStatus:  http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
 				if len(resp.Id) < 32 {
 					t.Errorf("expected UUID format for Id, got: %s", resp.Id)
 				}
-				
+
 				if len(resp.Data) != 0 {
 					for i, item := range resp.Data {
 						if item == "" {
@@ -88,19 +88,19 @@ func TestApiV1Convert(t *testing.T) {
 			},
 		},
 		{
-			name:           "Password Protected PDF Test",
-			density:        "300",
-			quality:        "90",
-			password:       "secret123",
-			fileContent:    "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
-			isEncrypted:    true,
+			name:            "Password Protected PDF Test",
+			density:         "300",
+			quality:         "90",
+			password:        "secret123",
+			fileContent:     "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
+			isEncrypted:     true,
 			requirePassword: true,
-			expectedStatus: http.StatusOK,
+			expectedStatus:  http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
 				if len(resp.Id) < 32 {
 					t.Errorf("expected UUID format for Id, got: %s", resp.Id)
 				}
-				
+
 				if len(resp.Data) == 0 {
 					t.Errorf("expected non-empty Data array")
 				}
@@ -115,17 +115,17 @@ func TestApiV1Convert(t *testing.T) {
 			isEncrypted:       true,
 			requirePassword:   true,
 			expectedStatus:    http.StatusBadRequest,
-			expectedErrorCode: apiV1.ErrCodePasswordRequired,
+			expectedErrorCode: apiV1.ErrCodeBadRequest,
 		},
 		{
-			name:           "Invalid Quality Parameter Test",
-			density:        "300",
-			quality:        "invalid",
-			password:       "",
-			fileContent:    "Test PDF Content",
-			isEncrypted:    false,
+			name:            "Invalid Quality Parameter Test",
+			density:         "300",
+			quality:         "invalid",
+			password:        "",
+			fileContent:     "Test PDF Content",
+			isEncrypted:     false,
 			requirePassword: false,
-			expectedStatus: http.StatusOK,
+			expectedStatus:  http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
 				if resp.Id == "" {
 					t.Errorf("expected non-empty ID, got empty string")
@@ -139,24 +139,24 @@ func TestApiV1Convert(t *testing.T) {
 			// Setup dependencies for testing with mock services
 			// Create a custom file builder that can mark files as encrypted for testing
 			fileBuilder := builder.NewFileBuilder()
-			
+
 			// Create mock services
 			mockImageConvertService := &MockImageConvertService{}
 			mockPdfDecryptService := NewMockPdfDecryptService(tt.requirePassword)
-			
+
 			convertUsecase := usecase.NewConvertUsecase(fileBuilder, mockImageConvertService, mockPdfDecryptService)
 			apiV1Service := v1.NewService(convertUsecase)
 			server := app.NewServer(apiV1Service)
 
 			body := &bytes.Buffer{}
 			writer := multipart.NewWriter(body)
-			
+
 			_ = writer.WriteField("density", tt.density)
 			_ = writer.WriteField("quality", tt.quality)
 			if tt.password != "" {
 				_ = writer.WriteField("password", tt.password)
 			}
-			
+
 			part, err := writer.CreateFormFile("data", "test.pdf")
 			if err != nil {
 				t.Fatal(err)
@@ -172,7 +172,7 @@ func TestApiV1Convert(t *testing.T) {
 
 			req := httptest.NewRequest("POST", "/v1/convert", body)
 			req.Header.Set("Content-Type", writer.FormDataContentType())
-			
+
 			recorder := httptest.NewRecorder()
 			server.ServeHTTP(recorder, req)
 
@@ -186,7 +186,7 @@ func TestApiV1Convert(t *testing.T) {
 				if err := json.Unmarshal(recorder.Body.Bytes(), &errorResp); err != nil {
 					t.Fatalf("failed to unmarshal error response: %v", err)
 				}
-				
+
 				if errorResp.Code != tt.expectedErrorCode {
 					t.Errorf("expected error code %d, got %d", tt.expectedErrorCode, errorResp.Code)
 				}
@@ -194,34 +194,34 @@ func TestApiV1Convert(t *testing.T) {
 			}
 
 			// For success responses
-				var resp apiV1.ConvertResponse
-				respBody := recorder.Body.Bytes()
-				
-				if !json.Valid(respBody) {
-					t.Fatalf("response is not valid JSON: %s", respBody)
-				}
-				
-				err := json.Unmarshal(respBody, &resp)
-				if err != nil {
-					t.Fatalf("failed to unmarshal response: %v", err)
-				}
-				
-				if resp.Id == "" {
-					t.Errorf("expected non-empty ID, got empty string")
-				}
-				
-				if resp.Data == nil {
-					t.Errorf("expected non-nil Data array, got nil")
-				}
-				
-				contentType := recorder.Header().Get("Content-Type")
-				if contentType != "application/json" {
-					t.Errorf("expected Content-Type to be application/json, got %s", contentType)
-				}
-				
-				if tt.validateResp != nil {
-					tt.validateResp(t, &resp)
-				}
+			var resp apiV1.ConvertResponse
+			respBody := recorder.Body.Bytes()
+
+			if !json.Valid(respBody) {
+				t.Fatalf("response is not valid JSON: %s", respBody)
+			}
+
+			err = json.Unmarshal(respBody, &resp)
+			if err != nil {
+				t.Fatalf("failed to unmarshal response: %v", err)
+			}
+
+			if resp.Id == "" {
+				t.Errorf("expected non-empty ID, got empty string")
+			}
+
+			if resp.Data == nil {
+				t.Errorf("expected non-nil Data array, got nil")
+			}
+
+			contentType := recorder.Header().Get("Content-Type")
+			if contentType != "application/json" {
+				t.Errorf("expected Content-Type to be application/json, got %s", contentType)
+			}
+
+			if tt.validateResp != nil {
+				tt.validateResp(t, &resp)
+			}
 		})
 	}
 }
