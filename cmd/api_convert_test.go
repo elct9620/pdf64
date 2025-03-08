@@ -137,10 +137,8 @@ func TestApiV1Convert(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup dependencies for testing with mock services
-			fileBuilder := builder.NewFileBuilder()
-			
 			// Create a custom file builder that can mark files as encrypted for testing
-			fileBuilder := &builder.FileBuilder{}
+			fileBuilder := builder.NewFileBuilder()
 			
 			// Create mock services
 			mockImageConvertService := &MockImageConvertService{}
@@ -224,7 +222,6 @@ func TestApiV1Convert(t *testing.T) {
 				if tt.validateResp != nil {
 					tt.validateResp(t, &resp)
 				}
-			}
 		})
 	}
 }
