@@ -32,11 +32,31 @@ func TestApiV1Convert(t *testing.T) {
 			fileContent:    "測試PDF內容",
 			expectedStatus: http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
+				// UUID 格式驗證 (簡單檢查)
+				if len(resp.Id) < 32 {
+					t.Errorf("expected UUID format for Id, got: %s", resp.Id)
+				}
+				
+				// 檢查 Data 陣列
+				if len(resp.Data) != 0 {
+					// 如果有數據，可以檢查每個項目是否為有效的 base64 編碼
+					for i, item := range resp.Data {
+						if item == "" {
+							t.Errorf("Data[%d] is empty", i)
+						}
+					}
+				}
+			},
+		},
+		{
+			name:           "無效品質參數測試",
+			density:        "300",
+			quality:        "invalid",
+			fileContent:    "測試PDF內容",
+			expectedStatus: http.StatusOK, // 目前實現會忽略無效品質，所以仍然返回 200
+			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
 				if resp.Id == "" {
 					t.Errorf("expected non-empty ID, got empty string")
-				}
-				if resp.Data == nil {
-					t.Errorf("expected non-nil Data, got nil")
 				}
 			},
 		},
@@ -86,11 +106,34 @@ func TestApiV1Convert(t *testing.T) {
 			// 解析並驗證回應
 			if tt.expectedStatus == http.StatusOK {
 				var resp apiV1.ConvertResponse
-				err := json.Unmarshal(recorder.Body.Bytes(), &resp)
+				respBody := recorder.Body.Bytes()
+				
+				// 檢查回應是否為有效的 JSON
+				if !json.Valid(respBody) {
+					t.Fatalf("response is not valid JSON: %s", respBody)
+				}
+				
+				err := json.Unmarshal(respBody, &resp)
 				if err != nil {
 					t.Fatalf("failed to unmarshal response: %v", err)
 				}
 				
+				// 基本結構驗證
+				if resp.Id == "" {
+					t.Errorf("expected non-empty ID, got empty string")
+				}
+				
+				if resp.Data == nil {
+					t.Errorf("expected non-nil Data array, got nil")
+				}
+				
+				// 檢查 Content-Type 標頭
+				contentType := recorder.Header().Get("Content-Type")
+				if contentType != "application/json" {
+					t.Errorf("expected Content-Type to be application/json, got %s", contentType)
+				}
+				
+				// 執行自定義驗證
 				if tt.validateResp != nil {
 					tt.validateResp(t, &resp)
 				}
