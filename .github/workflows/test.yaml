@@ -42,14 +42,15 @@ jobs:
           go-version: '1.23'
           cache: true
 
-      - name: Install ImageMagick 6 and Ghostscript
+      - name: Install ImageMagick 6, Ghostscript and QPDF
         run: |
           sudo apt-get update
-          sudo apt-get install -y imagemagick ghostscript
+          sudo apt-get install -y imagemagick ghostscript qpdf
           # Configure ImageMagick policy to allow PDF conversion
           sudo sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
           # Verify installation
           convert --version
+          qpdf --version
 
       - name: Run tests
         run: go test -v -cover ./...
