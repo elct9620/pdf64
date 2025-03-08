@@ -46,10 +46,22 @@ func TestImageMagickConvertService_Convert(t *testing.T) {
 
 	// This test might fail with a real PDF since our test file is not a valid PDF
 	// It's meant to demonstrate the structure of the test
-	_, err = service.Convert(context.Background(), file, options)
+	imagePaths, err := service.Convert(context.Background(), file, options)
 	if err != nil {
 		// We expect an error with our invalid PDF, but in a real test with a valid PDF
 		// this should not error
 		t.Logf("Expected error with invalid PDF: %v", err)
+	} else {
+		// If conversion succeeded, verify we got image paths
+		if len(imagePaths) == 0 {
+			t.Error("Expected at least one image path, got none")
+		}
+		
+		// Check that the returned paths exist
+		for _, path := range imagePaths {
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				t.Errorf("Image path does not exist: %s", path)
+			}
+		}
 	}
 }

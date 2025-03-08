@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/elct9620/pdf64/internal/entity"
@@ -22,7 +22,7 @@ func NewImageMagickConvertService() *ImageMagickConvertService {
 	return &ImageMagickConvertService{}
 }
 
-// Convert converts a PDF file to base64 encoded images
+// Convert converts a PDF file to images and returns their file paths
 func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.File, options usecase.ImageConvertOptions) ([]string, error) {
 	// Create temporary directory for output images
 	tmpDir, err := os.MkdirTemp("", "pdf64-images-*")
@@ -48,28 +48,23 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 		return nil, fmt.Errorf("failed to convert PDF to images: %w", err)
 	}
 
-	// Read generated images and encode them to base64
+	// Collect paths of generated images
 	files, err := os.ReadDir(tmpDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read temporary directory: %w", err)
 	}
 
-	var encodedImages []string
+	var imagePaths []string
 	for _, f := range files {
 		if !f.IsDir() && strings.HasPrefix(f.Name(), "page-") {
 			imagePath := filepath.Join(tmpDir, f.Name())
-			
-			// Read image file
-			imageData, err := os.ReadFile(imagePath)
-			if err != nil {
-				return nil, fmt.Errorf("failed to read image file %s: %w", imagePath, err)
-			}
-			
-			// Encode image to base64
-			encoded := base64.StdEncoding.EncodeToString(imageData)
-			encodedImages = append(encodedImages, encoded)
+			imagePaths = append(imagePaths, imagePath)
 		}
 	}
 
-	return encodedImages, nil
+	// Sort the image paths to ensure correct page order
+	// (This is important because ReadDir doesn't guarantee order)
+	sort.Strings(imagePaths)
+
+	return imagePaths, nil
 }
