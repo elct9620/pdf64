@@ -22,6 +22,12 @@ Naming Conventions
 - Use whole words in names when possible.
 - Use `has` or `is` prefix for boolean variables and methods.
 
+Coding Style
+---
+
+- Prefer `any` over `interface{}`.
+- Prefer `if err != nil` over `if err == nil`.
+
 Comments
 ---
 
