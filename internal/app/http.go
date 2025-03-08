@@ -18,11 +18,15 @@ func NewServer(
 	logger := httplog.NewLogger("pdf64", httplog.Options{
 		JSON:    true,
 		Concise: true,
+		QuietDownRoutes: []string{
+			"/healthz",
+		},
 	})
 
 	r := chi.NewRouter()
 	r.Use(httplog.RequestLogger(logger))
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Heartbeat("/healthz"))
 
 	v1.Register(r, ctrlV1)
 
