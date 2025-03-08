@@ -47,7 +47,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:${{ needs.release-please.outputs.tag_name }}
-            ghcr.io/${{ github.repository }}:v${{ needs.release-please.outputs.major_version }}.${{ needs.release-please.outputs.minor_version }}.${{ needs.release-please.outputs.patch_version }}
-            ghcr.io/${{ github.repository }}:v${{ needs.release-please.outputs.major_version }}
+            ghcr.io/${{ github.repository }}:v${{ needs.release-please.outputs.major }}.${{ needs.release-please.outputs.minor }}
+            ghcr.io/${{ github.repository }}:v${{ needs.release-please.outputs.major }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
