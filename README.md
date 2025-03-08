@@ -69,7 +69,4 @@ golangci-lint run
 
 ## License
 
-This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
-
-Due to the use of Ghostscript (AGPL-3.0), ImageMagick (Apache-2.0), and QPDF (Apache-2.0) as dependencies, 
-we have chosen the AGPL-3.0 license to ensure compliance with all dependency licenses.
+This project is licensed under the [Apache License 2.0](LICENSE).
