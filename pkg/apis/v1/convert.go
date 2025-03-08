@@ -26,11 +26,10 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 
 		err := r.ParseMultipartForm(32 << 20)
 		if err != nil {
-			respondWithError(w, Error{
+			respondWithError(w, r, Error{
 				Code:    ErrCodeBadRequest,
 				Message: "Failed to parse form",
-			}, http.StatusBadRequest)
-			httplog.LogEntrySetField(ctx, "error", slog.AnyValue(err))
+			}, http.StatusBadRequest, err)
 			return
 		}
 
@@ -47,11 +46,10 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 
 		file, _, err := r.FormFile("data")
 		if err != nil {
-			respondWithError(w, Error{
+			respondWithError(w, r, Error{
 				Code:    ErrCodeBadRequest,
 				Message: "Failed to get uploaded file",
-			}, http.StatusBadRequest)
-			httplog.LogEntrySetField(ctx, "error", slog.AnyValue(err))
+			}, http.StatusBadRequest, err)
 			return
 		}
 		defer file.Close()
@@ -65,14 +63,13 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 		resp, err := impl.Convert(r.Context(), &req)
 		if err != nil {
 			if apiErr, ok := err.(Error); ok {
-				respondWithError(w, apiErr, http.StatusBadRequest)
+				respondWithError(w, r, apiErr, http.StatusBadRequest, err)
 			} else {
-				respondWithError(w, Error{
+				respondWithError(w, r, Error{
 					Code:    ErrCodeInternal,
 					Message: "Conversion failed: " + err.Error(),
-				}, http.StatusInternalServerError)
+				}, http.StatusInternalServerError, err)
 			}
-			httplog.LogEntrySetField(ctx, "error", slog.AnyValue(err))
 			return
 		}
 

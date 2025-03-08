@@ -3,9 +3,11 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/httplog/v2"
 )
 
 type ServiceImpl interface {
@@ -20,7 +22,13 @@ func Register(r chi.Router, impl ServiceImpl) {
 	r.Post("/v1/convert", PostConvert(impl))
 }
 
-func respondWithError(w http.ResponseWriter, err Error, statusCode int) {
+func respondWithError(w http.ResponseWriter, err Error, statusCode int, originalErr error) {
+	// 記錄錯誤到日誌
+	if originalErr != nil {
+		ctx := r.Context()
+		httplog.LogEntrySetField(ctx, "error", slog.AnyValue(originalErr))
+	}
+	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(err)
