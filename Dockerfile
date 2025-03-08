@@ -23,7 +23,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o 
 FROM alpine:3.21
 
 # Install runtime dependencies
-RUN apk add --no-cache imagemagick ghostscript qpdf
+RUN apk add --no-cache imagemagick ghostscript qpdf curl
 
 # Create a non-root user
 RUN addgroup -S app && adduser -S app -G app
