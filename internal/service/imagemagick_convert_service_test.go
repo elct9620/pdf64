@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/elct9620/pdf64/internal/entity"
@@ -38,27 +37,57 @@ func TestImageMagickConvertService_Convert(t *testing.T) {
 		Quality: 90,
 	}
 
-	// Convert the PDF to images - this returns base64 encoded images, not file paths
-	encodedImages, err := service.Convert(context.Background(), file, options)
+	// Convert the PDF to images - this returns file paths to the generated images
+	imagePaths, err := service.Convert(context.Background(), file, options)
 	if err != nil {
 		t.Fatalf("Failed to convert PDF to images: %v", err)
 	}
 
-	// Verify we got encoded images
-	if len(encodedImages) == 0 {
-		t.Error("Expected at least one encoded image, got none")
+	// Verify we got image paths
+	if len(imagePaths) == 0 {
+		t.Error("Expected at least one image path, got none")
 	}
 
-	// Check that the returned strings are valid base64 encoded data
-	for i, encodedImage := range encodedImages {
-		if len(encodedImage) == 0 {
-			t.Errorf("Encoded image %d is empty", i)
+	// Create a temporary directory to copy the images to before they get deleted
+	tmpDir, err := os.MkdirTemp("", "pdf64-test-images-*")
+	if err != nil {
+		t.Fatalf("Failed to create temporary directory: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Check that the returned paths exist and are valid image files
+	for i, path := range imagePaths {
+		// Check if the file exists
+		fileInfo, err := os.Stat(path)
+		if os.IsNotExist(err) {
+			t.Errorf("Image path %d does not exist: %s", i, path)
 			continue
 		}
 		
-		// Check if the string starts with the base64 image prefix
-		if !strings.HasPrefix(encodedImage, "data:image/") {
-			t.Errorf("Encoded image %d does not have valid image data prefix", i)
+		// Check if it's a file (not a directory)
+		if fileInfo.IsDir() {
+			t.Errorf("Image path %d is a directory, not a file: %s", i, path)
+			continue
 		}
+		
+		// Check if the file has content (size > 0)
+		if fileInfo.Size() == 0 {
+			t.Errorf("Image file %d is empty: %s", i, path)
+			continue
+		}
+		
+		// Copy the file to our temporary directory for further inspection if needed
+		destPath := filepath.Join(tmpDir, filepath.Base(path))
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Errorf("Failed to read image file %d: %v", i, err)
+			continue
+		}
+		
+		if err := os.WriteFile(destPath, data, 0644); err != nil {
+			t.Errorf("Failed to copy image file %d: %v", i, err)
+		}
+		
+		t.Logf("Successfully verified image %d: %s (copied to %s)", i, path, destPath)
 	}
 }
