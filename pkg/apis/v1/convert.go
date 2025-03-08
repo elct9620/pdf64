@@ -1,8 +1,10 @@
 package v1
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type ConvertRequest struct {
@@ -18,5 +20,70 @@ type ConvertResponse struct {
 
 func PostConvert(impl ServiceImpl) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// 檢查請求方法
+		if r.Method != http.MethodPost {
+			http.Error(w, "只允許 POST 請求", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// 解析多部分表單，32 MB 是最大記憶體
+		err := r.ParseMultipartForm(32 << 20)
+		if err != nil {
+			http.Error(w, "無法解析表單", http.StatusBadRequest)
+			return
+		}
+
+		// 獲取表單參數
+		density := r.FormValue("density")
+		if density == "" {
+			http.Error(w, "缺少 density 參數", http.StatusBadRequest)
+			return
+		}
+
+		// 解析 quality 參數
+		qualityStr := r.FormValue("quality")
+		if qualityStr == "" {
+			http.Error(w, "缺少 quality 參數", http.StatusBadRequest)
+			return
+		}
+		
+		quality := 0
+		quality, err = strconv.Atoi(qualityStr)
+		if err != nil {
+			http.Error(w, "quality 參數必須是整數", http.StatusBadRequest)
+			return
+		}
+
+		// 獲取上傳的檔案
+		file, _, err := r.FormFile("data")
+		if err != nil {
+			http.Error(w, "無法獲取上傳的檔案", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		// 創建 ConvertRequest 物件
+		req := ConvertRequest{
+			Density: density,
+			Quality: quality,
+			File:    file,
+		}
+
+		// 呼叫實現的 Convert 方法
+		resp, err := impl.Convert(r.Context(), req)
+		if err != nil {
+			http.Error(w, "轉換失敗: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// 設置回應標頭
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// 編碼並回傳回應
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, "無法編碼回應", http.StatusInternalServerError)
+			return
+		}
 	}
 }
