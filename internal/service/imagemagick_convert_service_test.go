@@ -3,7 +3,6 @@ package service_test
 import (
 	"context"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/elct9620/pdf64/internal/entity"
@@ -14,7 +13,7 @@ import (
 func TestImageMagickConvertService_Convert(t *testing.T) {
 	// Use the real PDF file from fixtures
 	pdfPath := "fixtures/dummy.pdf"
-	
+
 	// Verify the test PDF file exists
 	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
 		t.Fatalf("Test PDF file not found at %s", pdfPath)
@@ -37,12 +36,12 @@ func TestImageMagickConvertService_Convert(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to convert PDF to images: %v", err)
 	}
-	
+
 	// Verify we got image paths
 	if len(imagePaths) == 0 {
 		t.Error("Expected at least one image path, got none")
 	}
-	
+
 	// Check that the returned paths exist
 	for _, path := range imagePaths {
 		if _, err := os.Stat(path); os.IsNotExist(err) {
