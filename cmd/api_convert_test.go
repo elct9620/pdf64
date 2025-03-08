@@ -29,10 +29,23 @@ func (m *MockImageConvertService) Convert(ctx context.Context, file *entity.File
 }
 
 // MockPdfDecryptService is a mock implementation of the PdfDecryptService interface
-type MockPdfDecryptService struct{}
+type MockPdfDecryptService struct {
+	requirePassword bool
+}
 
-// Decrypt always returns success
+// NewMockPdfDecryptService creates a new MockPdfDecryptService
+func NewMockPdfDecryptService(requirePassword bool) *MockPdfDecryptService {
+	return &MockPdfDecryptService{
+		requirePassword: requirePassword,
+	}
+}
+
+// Decrypt returns success or error based on password requirement
 func (m *MockPdfDecryptService) Decrypt(ctx context.Context, file *entity.File, password string) error {
+	if m.requirePassword && password == "" {
+		return usecase.ErrPasswordRequired
+	}
+	
 	// Mark the file as decrypted
 	file.Decrypt()
 	return nil
@@ -40,13 +53,16 @@ func (m *MockPdfDecryptService) Decrypt(ctx context.Context, file *entity.File, 
 
 func TestApiV1Convert(t *testing.T) {
 	tests := []struct {
-		name           string
-		density        string
-		quality        string
-		password       string
-		fileContent    string
-		expectedStatus int
-		validateResp   func(t *testing.T, resp *apiV1.ConvertResponse)
+		name              string
+		density           string
+		quality           string
+		password          string
+		fileContent       string
+		isEncrypted       bool
+		requirePassword   bool
+		expectedStatus    int
+		expectedErrorCode apiV1.ErrorCode
+		validateResp      func(t *testing.T, resp *apiV1.ConvertResponse)
 	}{
 		{
 			name:           "Basic Conversion Test",
@@ -54,6 +70,8 @@ func TestApiV1Convert(t *testing.T) {
 			quality:        "90",
 			password:       "",
 			fileContent:    "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
+			isEncrypted:    false,
+			requirePassword: false,
 			expectedStatus: http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
 				if len(resp.Id) < 32 {
@@ -75,6 +93,8 @@ func TestApiV1Convert(t *testing.T) {
 			quality:        "90",
 			password:       "secret123",
 			fileContent:    "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
+			isEncrypted:    true,
+			requirePassword: true,
 			expectedStatus: http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
 				if len(resp.Id) < 32 {
@@ -87,11 +107,24 @@ func TestApiV1Convert(t *testing.T) {
 			},
 		},
 		{
+			name:              "Encrypted PDF Without Password Test",
+			density:           "300",
+			quality:           "90",
+			password:          "",
+			fileContent:       "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
+			isEncrypted:       true,
+			requirePassword:   true,
+			expectedStatus:    http.StatusBadRequest,
+			expectedErrorCode: apiV1.ErrCodePasswordRequired,
+		},
+		{
 			name:           "Invalid Quality Parameter Test",
 			density:        "300",
 			quality:        "invalid",
 			password:       "",
 			fileContent:    "Test PDF Content",
+			isEncrypted:    false,
+			requirePassword: false,
 			expectedStatus: http.StatusOK,
 			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
 				if resp.Id == "" {
@@ -106,9 +139,12 @@ func TestApiV1Convert(t *testing.T) {
 			// Setup dependencies for testing with mock services
 			fileBuilder := builder.NewFileBuilder()
 			
+			// Create a custom file builder that can mark files as encrypted for testing
+			fileBuilder := &builder.FileBuilder{}
+			
 			// Create mock services
 			mockImageConvertService := &MockImageConvertService{}
-			mockPdfDecryptService := &MockPdfDecryptService{}
+			mockPdfDecryptService := NewMockPdfDecryptService(tt.requirePassword)
 			
 			convertUsecase := usecase.NewConvertUsecase(fileBuilder, mockImageConvertService, mockPdfDecryptService)
 			apiV1Service := v1.NewService(convertUsecase)
@@ -146,7 +182,20 @@ func TestApiV1Convert(t *testing.T) {
 				t.Errorf("expected status code %d, got %d", tt.expectedStatus, recorder.Code)
 			}
 
-			if tt.expectedStatus == http.StatusOK {
+			// For error responses, check the error code
+			if tt.expectedStatus != http.StatusOK {
+				var errorResp apiV1.Error
+				if err := json.Unmarshal(recorder.Body.Bytes(), &errorResp); err != nil {
+					t.Fatalf("failed to unmarshal error response: %v", err)
+				}
+				
+				if errorResp.Code != tt.expectedErrorCode {
+					t.Errorf("expected error code %d, got %d", tt.expectedErrorCode, errorResp.Code)
+				}
+				return
+			}
+
+			// For success responses
 				var resp apiV1.ConvertResponse
 				respBody := recorder.Body.Bytes()
 				
