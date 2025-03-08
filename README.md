@@ -41,14 +41,14 @@ go build -o pdf64 ./cmd
 ```bash
 # Basic usage
 curl -X POST \
-  -F "file=@example.pdf" \
+  -F "data=@example.pdf" \
   -F "density=300" \
   -F "quality=90" \
   http://localhost:8080/v1/convert
 
 # For password-protected PDF files
 curl -X POST \
-  -F "file=@encrypted.pdf" \
+  -F "data=@encrypted.pdf" \
   -F "password=your_password" \
   -F "density=300" \
   -F "quality=90" \
