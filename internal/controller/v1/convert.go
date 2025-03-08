@@ -49,6 +49,7 @@ func (s *Service) Convert(ctx context.Context, req *v1.ConvertRequest) (*v1.Conv
 	// Execute conversion use case
 	out, err := s.convertUsecase.Execute(ctx, &usecase.ConvertInput{
 		FilePath: filePath,
+		Password: req.Password,
 		Density:  density,
 		Quality:  quality,
 	})

@@ -30,6 +30,7 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 		}
 
 		density := r.FormValue("density")
+		password := r.FormValue("password")
 
 		quality := 0
 		qualityStr := r.FormValue("quality")
@@ -51,9 +52,10 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 		defer file.Close()
 
 		req := ConvertRequest{
-			Density: density,
-			Quality: quality,
-			File:    file,
+			Password: password,
+			Density:  density,
+			Quality:  quality,
+			File:     file,
 		}
 
 		resp, err := impl.Convert(r.Context(), &req)
