@@ -19,14 +19,14 @@ func NewServer(
 		JSON:    true,
 		Concise: true,
 		QuietDownRoutes: []string{
-			"/healthz",
+			"/livez",
 		},
 	})
 
 	r := chi.NewRouter()
 	r.Use(httplog.RequestLogger(logger))
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Heartbeat("/healthz"))
+	r.Use(middleware.Heartbeat("/livez"))
 
 	v1.Register(r, ctrlV1)
 
