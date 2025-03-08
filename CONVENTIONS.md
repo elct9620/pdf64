@@ -40,6 +40,7 @@ Testing
 
 - Use `testing` package for unit and integration tests.
 - Use `httptest` package for HTTP tests.
+- Use `jmespath` to verify partial JSON responses in the integration tests.
 - Use `_test` as package suffix for test packages excluding the main package.
 - Write integration tests for the API.
 
