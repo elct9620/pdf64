@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type ConvertRequest struct {
@@ -17,6 +18,14 @@ type ConvertRequest struct {
 type ConvertResponse struct {
 	Id   string   `json:"id"`
 	Data []string `json:"data"`
+}
+
+// parseBoolFormValue parses a form value as boolean
+// Accepts "true", "yes", "1" as true values (case insensitive)
+// All other values are considered false
+func parseBoolFormValue(value string) bool {
+	value = strings.ToLower(value)
+	return value == "true" || value == "yes" || value == "1"
 }
 
 func PostConvert(impl ServiceImpl) http.HandlerFunc {
@@ -42,11 +51,7 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 			}
 		}
 
-		merge := false
-		mergeStr := r.FormValue("merge")
-		if mergeStr == "true" || mergeStr == "1" {
-			merge = true
-		}
+		merge := parseBoolFormValue(r.FormValue("merge"))
 
 		file, _, err := r.FormFile("data")
 		if err != nil {
