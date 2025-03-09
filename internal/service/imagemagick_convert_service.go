@@ -75,7 +75,7 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 
 	// Collect paths of generated images
 	var imagePaths []string
-	
+
 	if options.Merge {
 		// In merge mode, we only have one output file
 		mergedPath := filepath.Join(tmpDir, "merged.jpg")

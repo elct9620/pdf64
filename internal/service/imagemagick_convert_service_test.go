@@ -87,23 +87,23 @@ func runConversionTest(t *testing.T, file *entity.File, service *service.ImageMa
 			t.Errorf("Encoded image %d is empty", i)
 			continue
 		}
-		
+
 		// Check if the string starts with the base64 image prefix
 		if !strings.HasPrefix(encodedImage, "data:image/jpeg;base64,") {
 			t.Errorf("Encoded image %d does not have valid image data prefix", i)
 			continue
 		}
-		
+
 		// Extract the base64 part
 		base64Data := strings.TrimPrefix(encodedImage, "data:image/jpeg;base64,")
-		
+
 		// Try to decode it to verify it's valid base64
 		_, err := base64.StdEncoding.DecodeString(base64Data)
 		if err != nil {
 			t.Errorf("Encoded image %d contains invalid base64 data: %v", i, err)
 			continue
 		}
-		
+
 		t.Logf("Successfully verified base64 encoded image %d", i)
 	}
 }
