@@ -42,6 +42,12 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 			}
 		}
 
+		merge := false
+		mergeStr := r.FormValue("merge")
+		if mergeStr == "true" || mergeStr == "1" {
+			merge = true
+		}
+
 		file, _, err := r.FormFile("data")
 		if err != nil {
 			respondWithError(w, r, Error{
@@ -56,6 +62,7 @@ func PostConvert(impl ServiceImpl) http.HandlerFunc {
 			Password: password,
 			Density:  density,
 			Quality:  quality,
+			Merge:    merge,
 			File:     file,
 		}
 
