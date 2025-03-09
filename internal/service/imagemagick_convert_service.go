@@ -47,7 +47,7 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 	if options.Merge {
 		// For merged output, we use a single file name
 		outputPattern = filepath.Join(tmpDir, "merged.jpg")
-		args = append(args, "-append", file.Path(), outputPattern)
+		args = append(args, file.Path(), "-append", outputPattern)
 	} else {
 		args = append(args, file.Path(), outputPattern)
 	}
