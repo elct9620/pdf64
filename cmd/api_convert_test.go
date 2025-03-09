@@ -39,7 +39,7 @@ func (m *MockFileBuilder) BuildFromPath(path string) (*entity.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	file := entity.NewFile(id.String(), path)
 	if m.isEncrypted {
 		file.Encrypt()
@@ -166,7 +166,7 @@ func TestApiV1Convert(t *testing.T) {
 				if len(resp.Id) < 32 {
 					t.Errorf("expected UUID format for Id, got: %s", resp.Id)
 				}
-				
+
 				// When merge is true, we expect exactly one image in the response
 				if len(resp.Data) != 1 {
 					t.Errorf("expected exactly one merged image, got %d", len(resp.Data))
@@ -187,7 +187,7 @@ func TestApiV1Convert(t *testing.T) {
 				if len(resp.Id) < 32 {
 					t.Errorf("expected UUID format for Id, got: %s", resp.Id)
 				}
-				
+
 				// When merge is yes, we expect exactly one image in the response
 				if len(resp.Data) != 1 {
 					t.Errorf("expected exactly one merged image, got %d", len(resp.Data))
