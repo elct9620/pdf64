@@ -7,6 +7,7 @@ PDF64 is a tool for converting PDF documents to Base64 encoded images, making it
 - Convert PDF files to Base64 encoded images
 - Support for adjusting image density and quality
 - Support for password-protected PDF files
+- Option to merge all pages into a single image
 - RESTful API interface
 - Docker container support
 
@@ -52,6 +53,14 @@ curl -X POST \
   -F "password=your_password" \
   -F "density=300" \
   -F "quality=90" \
+  http://localhost:8080/v1/convert
+
+# To merge all pages into a single image
+curl -X POST \
+  -F "data=@example.pdf" \
+  -F "density=300" \
+  -F "quality=90" \
+  -F "merge=true" \
   http://localhost:8080/v1/convert
 ```
 
