@@ -55,6 +55,7 @@ func (s *Service) Convert(ctx context.Context, req *v1.ConvertRequest) (*v1.Conv
 		Password: req.Password,
 		Density:  density,
 		Quality:  quality,
+		Merge:    req.Merge,
 	})
 	if err != nil {
 		// Handle specific errors
