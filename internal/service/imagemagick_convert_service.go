@@ -41,8 +41,15 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 	args := []string{
 		"-density", options.Density,
 		"-quality", fmt.Sprintf("%d", options.Quality),
-		file.Path(),
-		outputPattern,
+	}
+
+	// If merge is enabled, we'll append all pages into a single image
+	if options.Merge {
+		// For merged output, we use a single file name
+		outputPattern = filepath.Join(tmpDir, "merged.jpg")
+		args = append(args, "-append", file.Path(), outputPattern)
+	} else {
+		args = append(args, file.Path(), outputPattern)
 	}
 
 	cliPath, err := exec.LookPath("magick")
@@ -67,22 +74,34 @@ func (s *ImageMagickConvertService) Convert(ctx context.Context, file *entity.Fi
 	}
 
 	// Collect paths of generated images
-	files, err := os.ReadDir(tmpDir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read temporary directory: %w", err)
-	}
-
 	var imagePaths []string
-	for _, f := range files {
-		if !f.IsDir() && strings.HasPrefix(f.Name(), "page-") {
-			imagePath := filepath.Join(tmpDir, f.Name())
-			imagePaths = append(imagePaths, imagePath)
+	
+	if options.Merge {
+		// In merge mode, we only have one output file
+		mergedPath := filepath.Join(tmpDir, "merged.jpg")
+		if _, err := os.Stat(mergedPath); err == nil {
+			imagePaths = append(imagePaths, mergedPath)
+		} else {
+			return nil, fmt.Errorf("failed to find merged output image: %w", err)
 		}
-	}
+	} else {
+		// In normal mode, collect all page-* files
+		files, err := os.ReadDir(tmpDir)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read temporary directory: %w", err)
+		}
 
-	// Sort the image paths to ensure correct page order
-	// (This is important because ReadDir doesn't guarantee order)
-	sort.Strings(imagePaths)
+		for _, f := range files {
+			if !f.IsDir() && strings.HasPrefix(f.Name(), "page-") {
+				imagePath := filepath.Join(tmpDir, f.Name())
+				imagePaths = append(imagePaths, imagePath)
+			}
+		}
+
+		// Sort the image paths to ensure correct page order
+		// (This is important because ReadDir doesn't guarantee order)
+		sort.Strings(imagePaths)
+	}
 
 	// Convert images to base64
 	var base64Images []string
