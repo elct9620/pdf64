@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://github.com/elct9620/pdf64/compare/v1.1.0...v1.2.0) (2025-03-09)
+
+
+### Features
+
+* Add helper function to parse boolean form values ([8ce005a](https://github.com/elct9620/pdf64/commit/8ce005add360a41ff1de639f0efd105dc0e38c4f))
+* Add merge option to image conversion process ([673e46a](https://github.com/elct9620/pdf64/commit/673e46a71b6eb6a336a9679ae702e8539e5b91b2))
+* Add merge option to ImageMagick PDF conversion service ([666c0ef](https://github.com/elct9620/pdf64/commit/666c0ef17c822e3a34fa134d4efa1a006df8576b))
+* Add test cases for merge option in PDF conversion API ([efd1463](https://github.com/elct9620/pdf64/commit/efd14630c9252196651830931e6de1205e7fddd2))
+* Parse merge parameter in convert request handler ([93a1151](https://github.com/elct9620/pdf64/commit/93a115134e2c67083b423c5353456d9edd79348b))
+
+
+### Bug Fixes
+
+* Correct ImageMagick `-append` parameter order for merged PDF conversion ([ff0ce04](https://github.com/elct9620/pdf64/commit/ff0ce042426f8e6a0175c1a45d500a4d8a0d57e1))
+
 ## [1.1.0](https://github.com/elct9620/pdf64/compare/v1.0.3...v1.1.0) (2025-03-08)
 
 
