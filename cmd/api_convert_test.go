@@ -76,6 +76,7 @@ func TestApiV1Convert(t *testing.T) {
 		density           string
 		quality           string
 		password          string
+		merge             string
 		fileContent       string
 		isEncrypted       bool
 		requirePassword   bool
@@ -151,6 +152,48 @@ func TestApiV1Convert(t *testing.T) {
 				}
 			},
 		},
+		{
+			name:            "Merge Pages Test",
+			density:         "300",
+			quality:         "90",
+			password:        "",
+			merge:           "true",
+			fileContent:     "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
+			isEncrypted:     false,
+			requirePassword: false,
+			expectedStatus:  http.StatusOK,
+			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
+				if len(resp.Id) < 32 {
+					t.Errorf("expected UUID format for Id, got: %s", resp.Id)
+				}
+				
+				// When merge is true, we expect exactly one image in the response
+				if len(resp.Data) != 1 {
+					t.Errorf("expected exactly one merged image, got %d", len(resp.Data))
+				}
+			},
+		},
+		{
+			name:            "Merge Pages with Yes Value Test",
+			density:         "300",
+			quality:         "90",
+			password:        "",
+			merge:           "yes",
+			fileContent:     "%PDF-1.5\n%%EOF\n", // Minimal valid PDF structure
+			isEncrypted:     false,
+			requirePassword: false,
+			expectedStatus:  http.StatusOK,
+			validateResp: func(t *testing.T, resp *apiV1.ConvertResponse) {
+				if len(resp.Id) < 32 {
+					t.Errorf("expected UUID format for Id, got: %s", resp.Id)
+				}
+				
+				// When merge is yes, we expect exactly one image in the response
+				if len(resp.Data) != 1 {
+					t.Errorf("expected exactly one merged image, got %d", len(resp.Data))
+				}
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -176,6 +219,9 @@ func TestApiV1Convert(t *testing.T) {
 			_ = writer.WriteField("quality", tt.quality)
 			if tt.password != "" {
 				_ = writer.WriteField("password", tt.password)
+			}
+			if tt.merge != "" {
+				_ = writer.WriteField("merge", tt.merge)
 			}
 
 			part, err := writer.CreateFormFile("data", "test.pdf")
