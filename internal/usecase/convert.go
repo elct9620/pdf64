@@ -14,6 +14,7 @@ type ConvertInput struct {
 	Password string
 	Density  string
 	Quality  int
+	Merge    bool
 }
 
 type ConvertOutput struct {
@@ -55,6 +56,7 @@ func (u *ConvertUsecase) Execute(ctx context.Context, input *ConvertInput) (*Con
 	images, err := u.converter.Convert(ctx, file, ImageConvertOptions{
 		Density: input.Density,
 		Quality: input.Quality,
+		Merge:   input.Merge,
 	})
 	if err != nil {
 		return nil, err

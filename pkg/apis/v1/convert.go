@@ -10,6 +10,7 @@ type ConvertRequest struct {
 	Password string `json:"password"`
 	Density  string `json:"density"`
 	Quality  int    `json:"quality"`
+	Merge    bool   `json:"merge"`
 	File     io.ReadCloser
 }
 

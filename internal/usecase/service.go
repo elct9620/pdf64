@@ -9,6 +9,7 @@ import (
 type ImageConvertOptions struct {
 	Density string
 	Quality int
+	Merge   bool
 }
 
 type ImageConvertService interface {
